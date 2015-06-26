@@ -17,7 +17,6 @@
 
 			var camera, scene, renderer, raycaster;
 			var cube;
-			var lighttheta, lightphi, orbit = 20;
 
 			var targetRotationX = 0;
 			var targetRotationOnMouseDownX = 0;
@@ -28,16 +27,10 @@
 			var mouseXOnMouseDown = 0;
 			var mouseYOnMouseDown = 0;
 
-			var lightRots = [];
-			var lights = [];
-			var lightSpheres = [];
-
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
 			xquad = 1;
-			yquad = 1;
-			var skipcount = 0;
 
 			init();
 			animate();
@@ -63,22 +56,6 @@
 
 				var colors = [0xFFD119, 0xB212A6, 0x14CCB9];
 				var geometry = new THREE.SphereGeometry(0.2, 4, 4);
-
-				for( var i = 0; i < 3; i++){
-					var light = new THREE.PointLight(colors[i], 2, 40);
-					lights.push(light);
-					scene.add(light);
-
-					var lightSphere = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial( { color: colors[i] } ));
-					lightSpheres.push(lightSphere);
-					scene.add(lightSphere);
-
-					lightRots.push( []);
-					for( var j = 0; j < 3; j++)
-						lightRots[i].push( Math.random());
-
-					
-				}
 
 				// Cube
 
@@ -213,58 +190,9 @@
 				if (5*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < (7*Math.PI/4)) xquad = 4;
 
 				if (xquad == 3 || xquad == 4) cube.rotation.y += ( -targetRotationX -cube.rotation.y ) * 0.03;
-				else
-
-				cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.03;
+				else cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.03;
 
 				cube.rotation.x += (  targetRotationY - cube.rotation.x ) * 0.03;
-
-
-
-				//LIGHT
-				var time = Date.now() * 0.001;
-
-
-
-				// light1.position.x = Math.sin( time * 0.7 ) * orbit;
-				// light1.position.y = Math.cos( time * 0.5 ) * orbit;
-				// light1.position.z = Math.cos( time * 0.3 ) * orbit;
-
-				// light2.position.x = Math.cos( time * 0.3 ) * orbit;
-				// light2.position.y = Math.sin( time * 0.5 ) * orbit;
-				// light2.position.z = Math.sin( time * 0.7 ) * orbit;
-
-				// light3.position.x = Math.sin( time * 0.4 ) * orbit;
-				// light3.position.y = Math.cos( time * 0.7 ) * orbit;
-				// light3.position.z = Math.cos( time * 0.5 ) * orbit;
-
-				// light1s.position.x = Math.sin( time * 0.7 ) * orbit;
-				// light1s.position.y = Math.cos( time * 0.5 ) * orbit;
-				// light1s.position.z = Math.cos( time * 0.3 ) * orbit;
-
-				// light2s.position.x = Math.cos( time * 0.3 ) * orbit;
-				// light2s.position.y = Math.sin( time * 0.5 ) * orbit;
-				// light2s.position.z = Math.sin( time * 0.7 ) * orbit;
-
-				// light3s.position.x = Math.cos( time * 0.4 ) * orbit;
-				// light3s.position.y = Math.sin( time * 0.7 ) * orbit;
-				// light3s.position.z = Math.sin( time * 0.5 ) * orbit;
-
-				// light1.updateMatrix();
-    // 			light1.updateMatrixWorld();
-    // 			light2.updateMatrix();
-    // 			light2.updateMatrixWorld(); 
-
-    		//	var inverse = cube.quaternion.copy().inverse();
-    		
-
-    			//cube.quaternion.multiplyQuaternions(new THREE.Quaternion(0,0,0,0).multiplyQuaternions( inverse , new THREE.Quaternion(mouseXOnMouseDown, mouseYOnMouseDown)), cube.quaternion)
-
-				if (skipcount == 10){
-					console.log("x: "+(cube.rotation.x).toFixed(2)+"  y: "+(cube.rotation.y).toFixed(2)+"  z: "+(cube.rotation.z).toFixed(2)+" "+xquad);
-					skipcount = 0
-				} else 
-					skipcount++;
 
 				renderer.render( scene, camera );
 
