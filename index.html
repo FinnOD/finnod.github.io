@@ -27,6 +27,7 @@
 	var mouseY = 0;
 	var mouseXOnMouseDown = 0;
 	var mouseYOnMouseDown = 0;
+	var mouseDown;
 
 	var lightRots = [];
 	var lights = [];
@@ -128,6 +129,7 @@
 			function onDocumentMouseDown( event ) {
 
 				event.preventDefault();
+				mouseDown = true;
 
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
@@ -138,6 +140,21 @@
 
 				mouseYOnMouseDown = event.clientY - windowHalfY;
 				targetRotationOnMouseDownY = targetRotationY;
+
+				var x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				var y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+				var vector = new THREE.Vector3( x, y, 1 );
+				vector.unproject( camera );
+
+				var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+				var intersects = ray.intersectObjects( [cube]);
+				if ( intersects.length > 0 ) {
+					
+					intersects[ 0 ].face.color.setHSL( Math.random(), 0.4, Math.random() * 0.25 + 0.5 );
+					intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
+				}
 
 			}
 
@@ -152,6 +169,8 @@
 			}
 
 			function onDocumentMouseUp( event ) {
+
+				mouseDown = false;
 
 				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
