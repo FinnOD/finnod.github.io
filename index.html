@@ -1,52 +1,59 @@
 <html lang="en">
-	<head>
-		<title>-OD</title>
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				font-family: Monospace;
-				margin: 0px;
-				overflow: hidden;
-			}
-		</style>
-	</head>
-	<body>
+<head>
+	<title>-OD</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+	body {
+		font-family: Monospace;
+		margin: 0px;
+		overflow: hidden;
+	}
+	</style>
+</head>
+<body>
 
-		<script src="three.min.js"></script>
-		<script>
+	<script src="three.min.js"></script>
+	<script>
 
-			var camera, scene, renderer, raycaster;
-			var cube;
+	var camera, scene, renderer, raycaster;
+	var cube;
+	var lighttheta, lightphi, orbit = 20;
 
-			var targetRotationX = 0;
-			var targetRotationOnMouseDownX = 0;
-			var targetRotationY = 0;
-			var targetRotationOnMouseDownY = 0;
-			var mouseX = 0;
-			var mouseY = 0;
-			var mouseXOnMouseDown = 0;
-			var mouseYOnMouseDown = 0;
+	var targetRotationX = 0;
+	var targetRotationOnMouseDownX = 0;
+	var targetRotationY = 0;
+	var targetRotationOnMouseDownY = 0;
+	var mouseX = 0;
+	var mouseY = 0;
+	var mouseXOnMouseDown = 0;
+	var mouseYOnMouseDown = 0;
 
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
+	var lightRots = [];
+	var lights = [];
+	var lightSpheres = [];
 
-			xquad = 1;
+	var windowHalfX = window.innerWidth / 2;
+	var windowHalfY = window.innerHeight / 2;
 
-			init();
-			animate();
+	xquad = 1;
+	yquad = 1;
+	var skipcount = 0;
 
-			function init() {
+	init();
+	animate();
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+	function init() {
+
+		container = document.createElement( 'div' );
+		document.body.appendChild( container );
 
 
 
-				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-				camera.position.y = 0;
-				camera.position.z = 40;
+		camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+		camera.position.y = 0;
+		camera.position.z = 40;
 
-				scene = new THREE.Scene();
+		scene = new THREE.Scene();
 
 				//light
 
@@ -56,6 +63,22 @@
 
 				var colors = [0xFFD119, 0xB212A6, 0x14CCB9];
 				var geometry = new THREE.SphereGeometry(0.2, 4, 4);
+
+				for( var i = 0; i < 3; i++){
+					var light = new THREE.PointLight(colors[i], 2, 40);
+					lights.push(light);
+					scene.add(light);
+
+					var lightSphere = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial( { color: colors[i] } ));
+					lightSpheres.push(lightSphere);
+					scene.add(lightSphere);
+
+					lightRots.push( []);
+					for( var j = 0; j < 3; j++)
+						lightRots[i].push( Math.random());
+
+					
+				}
 
 				// Cube
 
@@ -68,7 +91,9 @@
 					geometry.faces[ i + 1 ].color= h;
 				}
 
-				var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors, overdraw: 0.5 } );//PhongMaterial( { specular: 0xffffff, shininess: 3 } );// { vertexColors: THREE.FaceColors, overdraw: 0.5 } );
+				//var material = new THREE.MeshPhongMaterial( { specular: 0xffffff, shininess: 3 } );
+				var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors, overdraw: 0.5 } );
+
 				cube = new THREE.Mesh( geometry, material );
 				scene.add( cube );
 
@@ -184,21 +209,45 @@
 			}
 			
 			function render() {
-				if (Math.abs(cube.rotation.x % (2*Math.PI)) >= 7*Math.PI/4  && Math.abs(cube.rotation.x % (2*Math.PI)) < (Math.PI/4)) xquad = 1;
-				if (Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < (3*Math.PI/4)) xquad = 2;
-				if (3*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < (5*Math.PI/4)) xquad = 3;
-				if (5*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < (7*Math.PI/4)) xquad = 4;
+				if (Math.abs(cube.rotation.x % 2*Math.PI) <= Math.PI/4  && Math.abs(cube.rotation.x % (2*Math.PI)) > 7*Math.PI/4) xquad = 1;
+				if (Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 3*Math.PI/4) xquad = 2;
+				if (3*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 5*Math.PI/4) xquad = 3;
+				if (5*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 7*Math.PI/4) xquad = 4;
 
 				if (xquad == 3 || xquad == 4) cube.rotation.y += ( -targetRotationX -cube.rotation.y ) * 0.03;
 				else cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.03;
 
 				cube.rotation.x += (  targetRotationY - cube.rotation.x ) * 0.03;
 
-				renderer.render( scene, camera );
 
-			}
 
-		</script>
+				//LIGHT
+				var time = Date.now() * 0.001;
 
-	</body>
-</html>
+				for( var i = 0; i < lights.length; i ++){
+
+					lights[i].position.x = lightSpheres[i].position.x = Math.sin( time * lightRots[i][0] ) * orbit;
+					lights[i].position.y = lightSpheres[i].position.y = Math.cos( time * lightRots[i][1] ) * orbit;
+					lights[i].position.z = lightSpheres[i].position.z = Math.cos( time * lightRots[i][2] ) * orbit;
+
+				}
+
+    			//	var inverse = cube.quaternion.copy().inverse();
+
+
+    			//cube.quaternion.multiplyQuaternions(new THREE.Quaternion(0,0,0,0).multiplyQuaternions( inverse , new THREE.Quaternion(mouseXOnMouseDown, mouseYOnMouseDown)), cube.quaternion)
+
+    			if (skipcount == 15){
+    				console.log("x: "+(cube.rotation.x % (2*Math.PI)).toFixed(2)+"  y: "+(cube.rotation.y).toFixed(2)+"  z: "+(cube.rotation.z).toFixed(2)+" "+xquad);
+    				skipcount = 0
+    			} else 
+    			skipcount++;
+
+    			renderer.render( scene, camera );
+
+    		}
+
+    		</script>
+
+    	</body>
+    	</html>
