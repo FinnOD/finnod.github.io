@@ -29,6 +29,9 @@
 	var mouseYOnMouseDown = 0;
 	var mouseDown;
 
+	var ex = 0, ey = 0;
+	var oex = 0, oey = 0;
+
 	var lightRots = [];
 	var lights = [];
 	var lightSpheres = [];
@@ -144,17 +147,24 @@
 				var x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				var y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-				var vector = new THREE.Vector3( x, y, 1 );
-				vector.unproject( camera );
+				ex = (event.clientX - windowHalfX) / window.innerWidth;
+				ey = -(event.clientY - windowHalfY) / window.innerHeight;
+				oex = (event.clientX - windowHalfX) / window.innerWidth;
+				oey = -(event.clientY - windowHalfY) / window.innerHeight;
 
-				var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+				//uncomment for changing colors
 
-				var intersects = ray.intersectObjects( [cube]);
-				if ( intersects.length > 0 ) {
+				// var vector = new THREE.Vector3( x, y, 1 );
+				// vector.unproject( camera );
+
+				// var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+				// var intersects = ray.intersectObjects( [cube]);
+				// if ( intersects.length > 0 ) {
 					
-					intersects[ 0 ].face.color.setHSL( Math.random(), 0.4, Math.random() * 0.25 + 0.5 );
-					intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
-				}
+				// 	intersects[ 0 ].face.color.setHSL( Math.random(), 0.4, Math.random() * 0.25 + 0.5 );
+				// 	intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
+				// }
 
 			}
 
@@ -165,6 +175,9 @@
 
 				mouseY = event.clientY - windowHalfY;
 				targetRotationY = targetRotationOnMouseDownY + ( mouseY - mouseYOnMouseDown ) * 0.02;
+
+				ex = (event.clientX - windowHalfX) / window.innerWidth;
+				ey = -(event.clientY - windowHalfY) / window.innerHeight;
 
 			}
 
@@ -228,15 +241,16 @@
 			}
 			
 			function render() {
-				if (Math.abs(cube.rotation.x % 2*Math.PI) <= Math.PI/4  && Math.abs(cube.rotation.x % (2*Math.PI)) > 7*Math.PI/4) xquad = 1;
-				if (Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 3*Math.PI/4) xquad = 2;
-				if (3*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 5*Math.PI/4) xquad = 3;
-				if (5*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 7*Math.PI/4) xquad = 4;
 
-				if (xquad == 3 || xquad == 4) cube.rotation.y += ( -targetRotationX -cube.rotation.y ) * 0.03;
-				else cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.03;
+				// if (Math.abs(cube.rotation.x % 2*Math.PI) <= Math.PI/4  && Math.abs(cube.rotation.x % (2*Math.PI)) > 7*Math.PI/4) xquad = 1;
+				// if (Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 3*Math.PI/4) xquad = 2;
+				// if (3*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 5*Math.PI/4) xquad = 3;
+				// if (5*Math.PI/4 <= Math.abs(cube.rotation.x % (2*Math.PI)) && Math.abs(cube.rotation.x % (2*Math.PI)) < 7*Math.PI/4) xquad = 4;
 
-				cube.rotation.x += (  targetRotationY - cube.rotation.x ) * 0.03;
+				// if (xquad == 3 || xquad == 4) cube.rotation.y += ( -targetRotationX -cube.rotation.y ) * 0.03;
+				// else cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.03;
+
+				// cube.rotation.x += (  targetRotationY - cube.rotation.x ) * 0.03;
 
 
 
@@ -245,19 +259,21 @@
 
 				for( var i = 0; i < lights.length; i ++){
 
-					lights[i].position.x = lightSpheres[i].position.x = Math.sin( time * lightRots[i][0] ) * orbit;
-					lights[i].position.y = lightSpheres[i].position.y = Math.cos( time * lightRots[i][1] ) * orbit;
-					lights[i].position.z = lightSpheres[i].position.z = Math.cos( time * lightRots[i][2] ) * orbit;
+					// lights[i].position.x = lightSpheres[i].position.x = Math.sin( time * lightRots[i][0] ) * orbit;
+					// lights[i].position.y = lightSpheres[i].position.y = Math.cos( time * lightRots[i][1] ) * orbit;
+					// lights[i].position.z = lightSpheres[i].position.z = Math.cos( time * lightRots[i][2] ) * orbit;
 
 				}
 
-    			//	var inverse = cube.quaternion.copy().inverse();
+    			
 
 
-    			//cube.quaternion.multiplyQuaternions(new THREE.Quaternion(0,0,0,0).multiplyQuaternions( inverse , new THREE.Quaternion(mouseXOnMouseDown, mouseYOnMouseDown)), cube.quaternion)
+				Q = new THREE.Quaternion(-oey*10, oex*10).normalize()
+    			cube.quaternion = cube.quaternion.slerp(Q, 0.05)	
+   				//.multiplyQuaternions( inverse , new THREE.Quaternion(mouseXOnMouseDown, mouseYOnMouseDown)), cube.quaternion
 
     			if (skipcount == 15){
-    				console.log("x: "+(cube.rotation.x % (2*Math.PI)).toFixed(2)+"  y: "+(cube.rotation.y).toFixed(2)+"  z: "+(cube.rotation.z).toFixed(2)+" "+xquad);
+    				console.log(targetRotationX, targetRotationY);
     				skipcount = 0
     			} else 
     			skipcount++;
